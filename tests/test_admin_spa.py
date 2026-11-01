@@ -37,7 +37,8 @@ def test_admin_spa_and_public_firebase_config_are_served(tmp_path: Path) -> None
 
     page = client.get("/admin/")
     assert page.status_code == 200
-    assert "College Control" in page.text
+    assert "<title>College Admin</title>" in page.text
+    assert 'src="/admin/app.js"' in page.text
 
     config = client.get("/admin/firebase-config.js")
     assert config.status_code == 200
