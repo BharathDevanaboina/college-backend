@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+var/
+.pytest_cache/
+.ruff_cache/
+.eggs-info/
+service-account*.json

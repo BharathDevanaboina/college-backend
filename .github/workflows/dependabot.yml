@@ -1,0 +1,16 @@
+# Opens pull requests for dependency updates. CI tests each one before you merge.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: monthly

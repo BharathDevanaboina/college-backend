@@ -1,0 +1,13 @@
+.git
+.github
+.venv
+venv
+var
+tests
+docs
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.env
+.env.*
+service-account*.json

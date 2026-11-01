@@ -1,0 +1,118 @@
+# 4. Firebase setup
+
+Do this once for **staging** (`college-staging`) and once for **production** (`college-prod`).
+The Firebase project and the Google Cloud project are the same project.
+
+## 1. Create the project
+
+1. Go to <https://console.firebase.google.com>, then **Add project**. Name it `college-prod` (or pick the existing Google Cloud project of that name).
+2. Google Analytics: you can link the Google Analytics property here.
+3. **Upgrade to the Blaze (pay-as-you-go) plan:** ⚙ → **Usage and billing** → **Details & settings** → **Modify plan**. Use the **college's** billing account. Blaze is required for Cloud Run, phone SMS and storage.
+4. Set a budget alert: Google Cloud Console → **Billing** → **Budgets & alerts** → create a monthly budget with email alerts at 50%, 90% and 100%.
+
+## 2. Authentication
+
+1. Firebase Console → **Authentication** → **Get started**.
+2. **Sign-in method:**
+   - Enable **Email/Password**. This is for the admin. Leave **Email link** off.
+   - Enable **Phone**. This is for student OTP.
+3. **Upgrade to Identity Platform:** Authentication → Settings → **Upgrade to Firebase Authentication with Identity Platform**. This is needed for Google Authenticator (TOTP) and SMS region controls. It's free for this usage level; SMS is billed per message.
+4. **Authorized domains** (Settings → Authorized domains): add the website domains, e.g. `college.com` and `www.college.com`. Phone sign-in only works on these domains.
+5. **SMS region policy** (Settings → SMS region policy): choose **Allow** and select **India** only. This blocks SMS fraud to foreign numbers.
+6. **Turn on Google Authenticator (TOTP) for the admin.** There is no button for this yet; run this once from a terminal where `gcloud` is logged in as a project owner:
+
+   ```bash
+   PROJECT_ID=college-prod
+   curl -X PATCH "https://identitytoolkit.googleapis.com/admin/v2/projects/${PROJECT_ID}/config?updateMask=mfa" \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     -H "X-Goog-User-Project: ${PROJECT_ID}" \
+     -H "Content-Type: application/json" \
+     -d '{"mfa":{"providerConfigs":[{"state":"ENABLED","totpProviderConfig":{"adjacentIntervals":5}}]}}'
+   ```
+
+   A JSON reply describing the config means it worked.
+7. **Staging only, test phone numbers:** Sign-in method → Phone → Phone numbers for testing. Add e.g. `+91 99999 00001` with code `123456`. Testers then receive no real SMS and it costs nothing.
+
+## Creating the admin account
+
+After the backend is deployed ([Deployment](07-deployment.md)), run:
+
+```bash
+./scripts/run-cli.sh production create-admin --email admin@college.com --name "College Admin"
+```
+
+This does two things:
+
+- It adds the email to the backend's **admin allow-list**. Only allow-listed emails get admin access, even if someone else creates a Firebase account.
+- It creates the **Firebase sign-in account**, with email marked verified, and prints a **temporary password**. Look in the job's logs: Cloud Console → Cloud Run → Jobs → `college-cli` → Logs. If the account already exists, the command only adds the email to the allow-list.
+
+Then:
+
+1. Sign in on the admin portal with the temporary password and change it. Firebase **Forgot password** also works.
+2. The admin portal (frontend) asks you to **set up Google Authenticator**: scan the QR code and type the 6-digit code. From then on every sign-in needs the code.
+
+To remove access:
+
+```bash
+./scripts/run-cli.sh production deactivate-admin --email admin@college.com
+```
+
+To also block the Firebase account: Firebase Console → Authentication → Users → **Disable account**.
+
+## 3. App Check (blocks bots from the public forms)
+
+1. Google Cloud Console → **Security → reCAPTCHA** → **Create key**.
+   - Type: **Website**.
+   - Domains: your site domains, plus `localhost` for staging only.
+2. Firebase Console → **App Check** → **Apps** → your web app → **reCAPTCHA Enterprise** → paste the key → **Save**.
+3. The frontend initialises App Check with the same site key and sends the token in the `X-Firebase-AppCheck` header. The backend verifies it (`APP_CHECK_ENABLED=true`).
+4. **Enforcement** (**App Check → APIs**): you can also enforce App Check for **Authentication**. Do this only after the website is live and the App Check metrics show the real site's traffic is verified.
+
+## 4. Storage
+
+1. Firebase Console → **Storage** → **Get started**.
+   - Location: **`asia-south1` (Mumbai)**. This can't be changed later.
+   - Start in **production mode**.
+2. The bucket is called `<project-id>.firebasestorage.app`. Put that name in `STORAGE_BUCKET` in `config/<env>.env.yaml`.
+3. **Security rules:** the browser never talks to Storage directly; only the backend does, with its service account. Replace the rules with "deny all" (Storage → Rules):
+
+   ```text
+   rules_version = '2';
+   service firebase.storage {
+     match /b/{bucket}/o {
+       match /{allPaths=**} {
+         allow read, write: if false;
+       }
+     }
+   }
+   ```
+
+   Public images still load. Their URLs include a download token created by the backend, which works regardless of these rules. Brochure PDFs have no such token, so they can only be fetched through the API after OTP.
+4. Turn on versioning and keep deleted files for 30 days (protection against mistakes):
+
+   ```bash
+   gcloud storage buckets update gs://college-prod.firebasestorage.app --versioning --soft-delete-duration=30d
+   ```
+
+## 5. Frontend web app and Hosting
+
+Not part of this backend, but the frontend team needs these:
+
+1. Firebase Console → ⚙ **Project settings** → **Your apps** → **Add app → Web**. Copy the config object into the frontend.
+2. In the frontend's `firebase.json`, forward the API to Cloud Run. The `/api/**` rule must come before the SPA catch-all:
+
+   ```json
+   {
+     "hosting": {
+       "public": "dist",
+       "rewrites": [
+         { "source": "/api/**", "run": { "serviceId": "college-api", "region": "asia-south1" } },
+         { "source": "**", "destination": "/index.html" }
+       ]
+     }
+   }
+   ```
+
+3. Connect the custom domain: **Hosting → Add custom domain**. Add the records it shows at the domain registrar. Don't touch the existing email (MX) records.
+
+How the frontend uses Auth, App Check and the API: [API reference](09-api-reference.md).

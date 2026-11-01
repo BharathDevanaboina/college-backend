@@ -1,0 +1,73 @@
+# Runs on every pull request and every push to main: lint, tests (SQLite and PostgreSQL),
+# migration checks and a Docker build. Nothing is deployed here.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check
+      - name: Unit and API tests (SQLite)
+        run: pytest
+
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: college
+          POSTGRES_PASSWORD: college
+          POSTGRES_DB: college
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U college"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql+psycopg://college:college@localhost:5432/college
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Migrations apply, match the models, and roll back cleanly
+        run: |
+          alembic upgrade head
+          alembic check
+          alembic downgrade base
+          alembic upgrade head
+      - name: Tests against PostgreSQL
+        run: |
+          PGPASSWORD=college psql -h localhost -U college -c "CREATE DATABASE college_tests;"
+          TEST_DATABASE_URL=postgresql+psycopg://college:college@localhost:5432/college_tests pytest
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t college-backend:ci .
