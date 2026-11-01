@@ -88,11 +88,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.mount("/admin", StaticFiles(directory=admin_directory, html=True), name="admin")
 
     if settings.storage_backend == "local":
-        from app.core.dependencies import get_storage
+        from app.core.storage import LocalStorage
+
+        local_storage = LocalStorage(settings.local_storage_dir, settings.public_base_url)
 
         application.mount(
             "/media",
-            StaticFiles(directory=get_storage().public_dir),
+            StaticFiles(directory=local_storage.public_dir),
             name="media",
         )
 
