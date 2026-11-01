@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
@@ -15,7 +17,7 @@ def test_module_registry_selects_existing_modules_and_validates_dependencies() -
     ]
 
 
-def test_admin_spa_and_public_firebase_config_are_served() -> None:
+def test_admin_spa_and_public_firebase_config_are_served(tmp_path: Path) -> None:
     """The browser assets and Firebase client config stay available together."""
     app = create_app(
         Settings(
@@ -23,6 +25,7 @@ def test_admin_spa_and_public_firebase_config_are_served() -> None:
             database_url="sqlite://",
             auth_mode="fake",
             storage_backend="local",
+            local_storage_dir=str(tmp_path / "storage"),
             sheets_backend="fake",
             app_check_enabled=False,
             firebase_web_api_key="public-test-key",
