@@ -2,6 +2,17 @@ from fastapi.testclient import TestClient
 
 from app.core.config import Settings
 from app.main import create_app
+from app.modules import ALL_MODULES, select_modules
+
+
+def test_module_registry_selects_existing_modules_and_validates_dependencies() -> None:
+    assert select_modules("all") == ALL_MODULES
+    assert [module.name for module in select_modules("admin_auth,registration,lead_sync,exam")] == [
+        "admin_auth",
+        "registration",
+        "lead_sync",
+        "exam",
+    ]
 
 
 def test_admin_spa_and_public_firebase_config_are_served() -> None:
