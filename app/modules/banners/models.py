@@ -18,7 +18,7 @@ class Banner(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("courses.id", ondelete="SET NULL"), nullable=True
     )
     image_path: Mapped[str] = mapped_column(String(300), nullable=False)
-    image_url: Mapped[str] = mapped_column(String(300), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(1000), nullable=False)
     thumb_path: Mapped[str] = mapped_column(String(300), nullable=False)
     thumb_url: Mapped[str] = mapped_column(String(1000), nullable=False)
     image_width: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

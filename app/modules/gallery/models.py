@@ -11,7 +11,7 @@ class GalleryImage(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     caption: Mapped[str | None] = mapped_column(String(200), nullable=True)
     image_path: Mapped[str] = mapped_column(String(300), nullable=False)
-    image_url: Mapped[str] = mapped_column(String(300), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(1000), nullable=False)
     thumb_path: Mapped[str] = mapped_column(String(300), nullable=False)
     thumb_url: Mapped[str] = mapped_column(String(1000), nullable=False)
     image_width: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

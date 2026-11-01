@@ -13,7 +13,7 @@ class PendingSheetRow(UUIDPrimaryKeyMixin, Base):
 
     __tablename__ = "pending_sheet_rows"
 
-    tab: Mapped[str] = mapped_column(String(160), nullable=False)
+    tab: Mapped[str] = mapped_column(String(100), nullable=False)
     headers: Mapped[list] = mapped_column(JSON, nullable=False)
     row: Mapped[list] = mapped_column(JSON, nullable=False)
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
