@@ -20,7 +20,7 @@ flowchart LR
 - **Cloud Run** runs this backend in a container. It scales automatically and costs nothing when idle (staging).
 - **PostgreSQL (Cloud SQL)** stores everything the admin manages: settings, courses, batches, banners, announcements, gallery, videos, brochure metadata and exam questions.
 - **Firebase Storage** stores image files (public) and brochure PDFs (private; students get them only through the API after OTP).
-- **Google Sheets** receives one row per brochure download and per exam registration. Student details are kept in the database. If Sheets is briefly unavailable, the row waits in a small retry queue and Cloud Scheduler retries it every 5 minutes. The backend only "verifies" the tokens Firebase issues.
+- **Google Sheets** receives one row per brochure download and per exam registration. Student lead details are not persisted in PostgreSQL; if Sheets is briefly unavailable, the row is held temporarily in the retry queue and Cloud Scheduler retries it every 5 minutes. The backend only "verifies" the tokens Firebase issues.
 - **Firebase Auth** handles the admin login (email, password and Google Authenticator) and the student phone OTP.
 
 ## Modules
@@ -58,7 +58,7 @@ Shared building blocks live in `app/core/`:
 
 - `config.py`: settings.
 - `database.py`: database sessions.
-- `errors.py`: standard error format.
+- `error.py`: standard error format.
 - `identity.py`: Firebase token checks.
 - `storage.py`: files.
 - `sheets.py`: Google Sheets.

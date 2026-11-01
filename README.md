@@ -64,6 +64,7 @@ Read them in this order the first time:
 | 8 | [Operations and maintenance](docs/08-operations.md) | Backups, restores, updates, admin tasks, troubleshooting |
 | 9 | [API reference for the frontend](docs/09-api-reference.md) | Every endpoint and the OTP, brochure and exam flows |
 | 10 | [Exam question Excel format](docs/10-exam-question-format.md) | Preparing question sets |
+| 11 | [Admin, API and database guide](docs/11-admin-api-database-guide.md) | Admin capabilities, endpoint inventory, authorization and data ownership |
 
 ## Project layout
 
