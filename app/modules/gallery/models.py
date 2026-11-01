@@ -17,6 +17,4 @@ class GalleryImage(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     image_width: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     image_height: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default=true()
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())

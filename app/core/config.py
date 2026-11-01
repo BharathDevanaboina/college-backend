@@ -4,6 +4,7 @@ Every setting is read from an environment variable with the same name in upper c
 (for example, `storage_bucket` -> `$STORAGE_BUCKET`). Locally, the values can also come
 from a `.env` file. See docs/03-configuration.md for the full list.
 """
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -18,9 +19,7 @@ DEV_TOKEN_SECRET = "local-development-only-secret-change-me-0123456789"  # noqa:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     # --- General ---------------------------------------------------------------
     app_env: Environment = "local"
@@ -30,14 +29,10 @@ class Settings(BaseSettings):
         default="all",
         description="Comma-separated module names to run in this service, or 'all'.",
     )
-    cors_allowed_origins: str = Field(
-        default="", description="Comma-separated list of allowed origins."
-    )
+    cors_allowed_origins: str = Field(default="", description="Comma-separated list of allowed origins.")
 
     # --- Database --------------------------------------------------------------
-    database_url: str | None = Field(
-        default=None, description="Full SQLAlchemy URL. Overrides DB_* parts."
-    )
+    database_url: str | None = Field(default=None, description="Full SQLAlchemy URL. Overrides DB_* parts.")
     db_user: str = "college"
     db_password: str = ""
     db_name: str = "college"
@@ -52,6 +47,13 @@ class Settings(BaseSettings):
 
     # --- Firebase / Google Cloud -----------------------------------------------
     gcp_project_id: str | None = None
+    # Firebase web-app configuration is public by design (unlike a service
+    # account). The admin SPA reads it from a same-origin config endpoint.
+    firebase_web_api_key: str | None = None
+    firebase_web_auth_domain: str | None = None
+    firebase_web_app_id: str | None = None
+    firebase_web_messaging_sender_id: str | None = None
+    firebase_web_measurement_id: str | None = None
     auth_mode: Literal["firebase", "fake"] = "firebase"
     require_admin_mfa: bool = True
     app_check_enabled: bool = True
@@ -120,17 +122,11 @@ class Settings(BaseSettings):
 
     @property
     def allowed_internal_service_accounts(self) -> set[str]:
-        return {
-            s.strip().lower()
-            for s in self.internal_allowed_service_accounts.split(",")
-            if s.strip()
-        }
+        return {s.strip().lower() for s in self.internal_allowed_service_accounts.split(",") if s.strip()}
 
     @property
     def token_secret(self) -> str:
-        return self.exam_token_secret or (
-            DEV_TOKEN_SECRET if not self.is_cloud else ""
-        )
+        return self.exam_token_secret or (DEV_TOKEN_SECRET if not self.is_cloud else "")
 
     def validate_for_environment(self) -> None:
         """Refuse to start with unsafe settings in staging or production."""
@@ -151,16 +147,10 @@ class Settings(BaseSettings):
             problems.append("EXAM_TOKEN_SECRET must be at least 32 characters")
         if not self.gcp_project_id:
             problems.append("GCP_PROJECT_ID is required")
-        if (
-            self.internal_auth_mode == "oidc"
-            and not (
-                self.internal_oidc_audience
-                and self.allowed_internal_service_accounts
-            )
+        if self.internal_auth_mode == "oidc" and not (
+            self.internal_oidc_audience and self.allowed_internal_service_accounts
         ):
-            problems.append(
-                "INTERNAL_OIDC_AUDIENCE and INTERNAL_ALLOWED_SERVICE_ACCOUNTS are required"
-            )
+            problems.append("INTERNAL_OIDC_AUDIENCE and INTERNAL_ALLOWED_SERVICE_ACCOUNTS are required")
         if self.internal_auth_mode == "token" and len(self.internal_task_token) < 32:
             problems.append("INTERNAL_TASK_TOKEN must be at least 32 characters")
 
@@ -171,4 +161,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

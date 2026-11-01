@@ -10,8 +10,16 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    JSON, Boolean, CheckConstraint, DateTime, ForeignKey, Integer,
-    String, Text, Uuid, func,
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    Uuid,
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -60,9 +68,7 @@ class ExamQuestion(UUIDPrimaryKeyMixin, Base):
     section: Mapped[str] = mapped_column(String(1), nullable=False)
     subsection: Mapped[str] = mapped_column(String(100), nullable=False)
     content: Mapped[list] = mapped_column(JSON, nullable=False)
-    options: Mapped[list["ExamOption"]] = relationship(
-        order_by="ExamOption.label", lazy="selectin"
-    )
+    options: Mapped[list[ExamOption]] = relationship(order_by="ExamOption.label", lazy="selectin")
 
 
 class ExamOption(UUIDPrimaryKeyMixin, Base):

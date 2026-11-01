@@ -27,7 +27,7 @@ class BatchCreate(BaseModel):
         return clean_text(value, max_length=100, allow_empty=False)
 
     @model_validator(mode="after")
-    def _dates(self) -> "BatchCreate":
+    def _dates(self) -> BatchCreate:
         if self.end_date < self.start_date:
             raise ValueError("end_date must be on or after start_date")
         return self
@@ -45,9 +45,7 @@ class BatchUpdate(BaseModel):
     @field_validator("timings")
     @classmethod
     def _timings(cls, value: str | None) -> str | None:
-        return None if value is None else clean_text(
-            value, max_length=100, allow_empty=False
-        )
+        return None if value is None else clean_text(value, max_length=100, allow_empty=False)
 
 
 class BatchOut(BaseModel):

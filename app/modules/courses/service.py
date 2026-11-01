@@ -61,8 +61,7 @@ def update_course(db: Session, code: str, data: CourseUpdate) -> CourseOut:
     total = changes.get("total_fee_inr", course.total_fee_inr)
     breakup = changes.get("fee_breakup", course.fee_breakup or [])
     breakup_total = sum(
-        item.amount_inr if hasattr(item, "amount_inr") else item["amount_inr"]
-        for item in breakup
+        item.amount_inr if hasattr(item, "amount_inr") else item["amount_inr"] for item in breakup
     )
     if breakup and breakup_total != total:
         raise ValidationFailed(
@@ -72,8 +71,7 @@ def update_course(db: Session, code: str, data: CourseUpdate) -> CourseOut:
 
     if "fee_breakup" in changes:
         changes["fee_breakup"] = [
-            item.model_dump() if hasattr(item, "model_dump") else item
-            for item in changes["fee_breakup"]
+            item.model_dump() if hasattr(item, "model_dump") else item for item in changes["fee_breakup"]
         ]
 
     for key, value in changes.items():

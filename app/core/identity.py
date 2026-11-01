@@ -46,9 +46,7 @@ class IdentityVerifier(Protocol):
 
     def delete_user(self, uid: str) -> None: ...
 
-    def ensure_admin_account(
-        self, email: str, display_name: str | None
-    ) -> str | None:
+    def ensure_admin_account(self, email: str, display_name: str | None) -> str | None:
         """Ensure a Firebase user exists with a verified email.
 
         Returns a temporary password when a new user was created,
@@ -118,9 +116,7 @@ class FirebaseIdentityVerifier:
             uid=claims["uid"],
             email=(claims.get("email") or "").lower(),
             email_verified=bool(claims.get("email_verified")),
-            mfa_verified=bool(
-                firebase_claims.get("sign_in_second_factor")
-            ),
+            mfa_verified=bool(firebase_claims.get("sign_in_second_factor")),
         )
 
     def verify_phone_token(self, token: str) -> PhoneIdentity:
@@ -132,9 +128,7 @@ class FirebaseIdentityVerifier:
         return PhoneIdentity(
             uid=claims["uid"],
             phone_number=claims.get("phone_number") or "",
-            sign_in_provider=(
-                firebase_claims.get("sign_in_provider") or ""
-            ),
+            sign_in_provider=(firebase_claims.get("sign_in_provider") or ""),
             auth_time=int(claims.get("auth_time") or 0),
         )
 

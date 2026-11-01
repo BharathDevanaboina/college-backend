@@ -67,10 +67,7 @@ def verify_submission(
         )
 
     now = time.time()
-    if (
-        identity.auth_time > now + 60
-        or now - identity.auth_time > settings.otp_max_age_seconds
-    ):
+    if identity.auth_time > now + 60 or now - identity.auth_time > settings.otp_max_age_seconds:
         raise Unauthorized(
             "Your OTP verification has expired. Please verify again.",
             code="OTP_EXPIRED",

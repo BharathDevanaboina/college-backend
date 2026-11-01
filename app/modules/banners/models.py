@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String,Uuid,true
+from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
-from app.modules.courses.models import Course
+
 
 class Banner(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "banners"

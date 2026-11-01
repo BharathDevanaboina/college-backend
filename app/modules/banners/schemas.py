@@ -20,9 +20,7 @@ class BannerUpdate(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: str | None) -> str | None:
-        return None if value is None else clean_text(
-            value, max_length=150, allow_empty=False
-        )
+        return None if value is None else clean_text(value, max_length=150, allow_empty=False)
 
 
 class BannerOut(BaseModel):

@@ -57,11 +57,7 @@ def parse_video_link(raw: str) -> VideoLink:
         if len(segments) >= 2 and segments[0] in ("embed", "live", "v"):
             return youtube(segments[1], short=False)
 
-    if (
-        host in INSTAGRAM_HOSTS
-        and len(segments) >= 2
-        and segments[0] in ("reel", "reels")
-    ):
+    if host in INSTAGRAM_HOSTS and len(segments) >= 2 and segments[0] in ("reel", "reels"):
         code = segments[1]
         if INSTAGRAM_CODE.match(code):
             return VideoLink(

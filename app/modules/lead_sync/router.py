@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.core.dependencies import get_sheets, require_internal_caller
 from app.core.sheets import SheetsClient
@@ -18,12 +19,8 @@ admin_router = APIRouter(
 )
 
 
-@internal_router.post(
-    "/flush", response_model=FlushResult, summary="Retry queued rows (Cloud Scheduler)"
-)
-def internal_flush(
-    db: Session = Depends(get_db), sheets: SheetsClient = Depends(get_sheets)
-) -> FlushResult:
+@internal_router.post("/flush", response_model=FlushResult, summary="Retry queued rows (Cloud Scheduler)")
+def internal_flush(db: Session = Depends(get_db), sheets: SheetsClient = Depends(get_sheets)) -> FlushResult:
     return service.flush(db, sheets)
 
 
@@ -32,14 +29,19 @@ def internal_flush(
     response_model=SyncStatus,
     summary="How many submissions are waiting for Google Sheets",
 )
-def sync_status(db: Session = Depends(get_db)) -> SyncStatus:
-    return service.status(db)
+def sync_status(db: Session = Depends(get_db), settings: Settings = Depends(get_settings)) -> SyncStatus:
+    status = service.status(db)
+    if settings.sheets_spreadsheet_id:
+        return status.model_copy(
+            update={
+                "spreadsheet_url": (
+                    f"https://docs.google.com/spreadsheets/d/{settings.sheets_spreadsheet_id}"
+                )
+            }
+        )
+    return status
 
 
-@admin_router.post(
-    "/flush", response_model=FlushResult, summary="Retry queued rows now"
-)
-def admin_flush(
-    db: Session = Depends(get_db), sheets: SheetsClient = Depends(get_sheets)
-) -> FlushResult:
+@admin_router.post("/flush", response_model=FlushResult, summary="Retry queued rows now")
+def admin_flush(db: Session = Depends(get_db), sheets: SheetsClient = Depends(get_sheets)) -> FlushResult:
     return service.flush(db, sheets)

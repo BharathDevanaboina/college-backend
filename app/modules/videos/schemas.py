@@ -13,9 +13,7 @@ class VideoIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     title: str
-    url: str = Field(
-        examples=["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
-    )
+    url: str = Field(examples=["https://www.youtube.com/watch?v=dQw4w9WgXcQ"])
     display_order: int = Field(default=0, ge=0, le=1000)
     is_active: bool = True
 

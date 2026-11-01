@@ -71,9 +71,7 @@ def build_site(db: Session, settings: Settings) -> PublicSite:
             thumb_url=b.thumb_url,
             image_width=b.image_width,
             image_height=b.image_height,
-            brochure_course_code=(
-                b.course.code if b.course and b.course_id in with_brochure else None
-            ),
+            brochure_course_code=(b.course.code if b.course and b.course_id in with_brochure else None),
         )
         for b in banners.list_banners(db, active_only=True)
     ]

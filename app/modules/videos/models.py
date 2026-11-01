@@ -15,6 +15,4 @@ class Video(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     video_id: Mapped[str] = mapped_column(String(60), nullable=False)
     embed_url: Mapped[str] = mapped_column(String(500), nullable=False)
     display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default=true()
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())

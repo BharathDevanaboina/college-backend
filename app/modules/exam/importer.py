@@ -21,7 +21,6 @@ from app.modules.exam.constants import (
 )
 from app.modules.exam.content import ContentError, parse_content
 
-
 QUESTION_COLUMNS = [
     "section",
     "subsection",
@@ -94,20 +93,13 @@ def _text(value) -> str:
 def _rows(ws) -> tuple[list[str], list[tuple[int, dict[str, str]]]]:
     iterator = ws.iter_rows(values_only=True)
     try:
-        header = [
-            _text(c).lower().replace(" ", "_")
-            for c in next(iterator)
-        ]
+        header = [_text(c).lower().replace(" ", "_") for c in next(iterator)]
     except StopIteration:
         return [], []
 
     rows = []
     for index, values in enumerate(iterator, start=2):
-        record = {
-            header[i]: _text(value)
-            for i, value in enumerate(values)
-            if i < len(header) and header[i]
-        }
+        record = {header[i]: _text(value) for i, value in enumerate(values) if i < len(header) and header[i]}
         if any(record.values()):
             rows.append((index, record))
     return header, rows
@@ -159,9 +151,7 @@ def parse_workbook(data: bytes) -> ImportReport:
                 passage_text = rec.get("passage_text", "")
                 try:
                     if len(passage_text) > MAX_TEXT_LENGTH:
-                        raise ContentError(
-                            f"text is longer than {MAX_TEXT_LENGTH} characters"
-                        )
+                        raise ContentError(f"text is longer than {MAX_TEXT_LENGTH} characters")
                     report.passages[key] = ParsedPassage(
                         key,
                         parse_content(passage_text),
@@ -214,9 +204,7 @@ def parse_workbook(data: bytes) -> ImportReport:
         question_text = rec.get("question", "")
         try:
             if len(question_text) > MAX_TEXT_LENGTH:
-                raise ContentError(
-                    f"text is longer than {MAX_TEXT_LENGTH} characters"
-                )
+                raise ContentError(f"text is longer than {MAX_TEXT_LENGTH} characters")
             content = parse_content(question_text)
         except ContentError as exc:
             problems.append(f"question: {exc}")
@@ -227,10 +215,7 @@ def parse_workbook(data: bytes) -> ImportReport:
             if not text:
                 problems.append(f"option_{label.lower()} is empty")
             elif len(text) > MAX_OPTION_LENGTH:
-                problems.append(
-                    f"option_{label.lower()} is longer than "
-                    f"{MAX_OPTION_LENGTH} characters"
-                )
+                problems.append(f"option_{label.lower()} is longer than {MAX_OPTION_LENGTH} characters")
             options.append((label, text))
 
         texts = [text.lower() for _, text in options if text]
@@ -245,14 +230,10 @@ def parse_workbook(data: bytes) -> ImportReport:
         if passage_key:
             passage = report.passages.get(passage_key)
             if passage is None:
-                problems.append(
-                    f"passage_id '{passage_key}' is not in the 'passages' sheet"
-                )
+                problems.append(f"passage_id '{passage_key}' is not in the 'passages' sheet")
             elif section:
                 if passage.section and passage.section != section:
-                    problems.append(
-                        f"passage '{passage_key}' is used in more than one section"
-                    )
+                    problems.append(f"passage '{passage_key}' is used in more than one section")
                 passage.section = passage.section or section
                 used_passages.add(passage_key)
 
@@ -274,17 +255,10 @@ def parse_workbook(data: bytes) -> ImportReport:
 
     # Pattern checks
     section_counts = Counter(question.section for question in report.questions)
-    report.section_counts = {
-        section: section_counts.get(section, 0)
-        for section in SECTION_TITLES
-    }
+    report.section_counts = {section: section_counts.get(section, 0) for section in SECTION_TITLES}
 
     for section, titles in EXPECTED_SUBSECTION_COUNTS.items():
-        found = Counter(
-            question.subsection
-            for question in report.questions
-            if question.section == section
-        )
+        found = Counter(question.subsection for question in report.questions if question.section == section)
         report.subsection_counts[section] = dict(found)
         known = {name.lower(): name for name in titles}
 
@@ -293,22 +267,16 @@ def parse_workbook(data: bytes) -> ImportReport:
                 report.warn(
                     "questions",
                     None,
-                    f"Section {section}: unexpected subsection '{name}' "
-                    f"({count} questions)",
+                    f"Section {section}: unexpected subsection '{name}' ({count} questions)",
                 )
 
         for name, expected in titles.items():
-            actual = sum(
-                count
-                for found_name, count in found.items()
-                if found_name.lower() == name.lower()
-            )
+            actual = sum(count for found_name, count in found.items() if found_name.lower() == name.lower())
             if actual != expected:
                 report.warn(
                     "questions",
                     None,
-                    f"Section {section} '{name}': expected {expected}, "
-                    f"found {actual}",
+                    f"Section {section} '{name}': expected {expected}, found {actual}",
                 )
 
     if not report.errors:
@@ -317,8 +285,7 @@ def parse_workbook(data: bytes) -> ImportReport:
             report.error(
                 "questions",
                 None,
-                f"A set must have exactly {TOTAL_QUESTIONS} questions; "
-                f"found {total}.",
+                f"A set must have exactly {TOTAL_QUESTIONS} questions; found {total}.",
             )
 
         for section, required in REQUIRED_SECTION_COUNTS.items():

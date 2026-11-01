@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import time
 import threading
+import time
 from collections import defaultdict, deque
-from typing import Deque
 
 from fastapi import Depends, HTTPException, Request, status
 
 from app.core.config import Settings, get_settings
-
 
 
 class RateLimiter:
@@ -21,7 +19,7 @@ class RateLimiter:
     """
 
     def __init__(self) -> None:
-        self._hits: dict[str, Deque[float]] = defaultdict(deque)
+        self._hits: dict[str, deque[float]] = defaultdict(deque)
         self.lock = threading.Lock()
 
     def hit(self, key: str, limit: int, window_seconds: int) -> None:

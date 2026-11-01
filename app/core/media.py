@@ -34,12 +34,8 @@ def store_image(
     stem = uuid.uuid4().hex
     large_path = f"public/{folder}/{stem}-large.webp"
     thumb_path = f"public/{folder}/{stem}-thumb.webp"
-    large_url = storage.save_public(
-        large_path, variants["large"].data, "image/webp"
-    )
-    thumb_url = storage.save_public(
-        thumb_path, variants["thumb"].data, "image/webp"
-    )
+    large_url = storage.save_public(large_path, variants["large"].data, "image/webp")
+    thumb_url = storage.save_public(thumb_path, variants["thumb"].data, "image/webp")
     return StoredImage(
         large_path,
         large_url,

@@ -40,7 +40,8 @@ SAMPLE_QUESTIONS = [
         "B",
         "Statistical Ability",
         "",
-        "The table shows the sales of a shop (in lakhs):\\n| Year | Sales |\\n| 2023 | 450 |\\n| 2024 | 540 |\\n"
+        "The table shows the sales of a shop (in lakhs):\\n| Year | Sales |\\n"
+        "| 2023 | 450 |\\n| 2024 | 540 |\\n"
         "What is the percentage increase in sales?",
         "10%",
         "15%",
@@ -132,8 +133,7 @@ def build_template() -> bytes:
         f"2. A set must have exactly {sum(REQUIRED_SECTION_COUNTS.values())} questions:",
     ]
     lines += [
-        f"   Section {s} - {SECTION_TITLES[s]}: {n} questions"
-        for s, n in REQUIRED_SECTION_COUNTS.items()
+        f"   Section {s} - {SECTION_TITLES[s]}: {n} questions" for s, n in REQUIRED_SECTION_COUNTS.items()
     ]
     lines += [
         "3. Section: A, B or C. Correct: A, B, C or D (the right option).",

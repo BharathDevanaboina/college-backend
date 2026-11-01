@@ -108,14 +108,10 @@ def register_error_handlers(app: FastAPI) -> None:
         return _problem(exc.status_code, exc.title, exc.code, exc.detail, exc.extra)
 
     @app.exception_handler(RequestValidationError)
-    async def _validation_error(
-        _: Request, exc: RequestValidationError
-    ) -> JSONResponse:
+    async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
         errors = [
             {
-                "field": ".".join(
-                    str(p) for p in err.get("loc", ()) if p != "body"
-                ),
+                "field": ".".join(str(p) for p in err.get("loc", ()) if p != "body"),
                 "message": err.get("msg"),
             }
             for err in exc.errors()
@@ -129,12 +125,8 @@ def register_error_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(StarletteHTTPException)
-    async def _http_error(
-        _: Request, exc: StarletteHTTPException
-    ) -> JSONResponse:
-        code = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}.get(
-            exc.status_code, "HTTP_ERROR"
-        )
+    async def _http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
+        code = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}.get(exc.status_code, "HTTP_ERROR")
         return _problem(
             exc.status_code,
             str(exc.detail),

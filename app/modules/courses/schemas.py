@@ -41,9 +41,7 @@ class CourseUpdate(BaseModel):
     @field_validator("name", "duration_text")
     @classmethod
     def required_text(cls, value: str | None) -> str | None:
-        return None if value is None else clean_text(
-            value, max_length=120, allow_empty=False
-        )
+        return None if value is None else clean_text(value, max_length=120, allow_empty=False)
 
     @field_validator("summary", "eligibility", "fee_note")
     @classmethod

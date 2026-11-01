@@ -17,12 +17,8 @@ def to_out(image: GalleryImage) -> GalleryOut:
     return GalleryOut.model_validate(image, from_attributes=True)
 
 
-def list_images(
-    db: Session, *, active_only: bool = False
-) -> list[GalleryImage]:
-    stmt = select(GalleryImage).order_by(
-        GalleryImage.display_order, GalleryImage.created_at.desc()
-    )
+def list_images(db: Session, *, active_only: bool = False) -> list[GalleryImage]:
+    stmt = select(GalleryImage).order_by(GalleryImage.display_order, GalleryImage.created_at.desc())
     if active_only:
         stmt = stmt.where(GalleryImage.is_active.is_(True))
     return list(db.scalars(stmt))
@@ -66,9 +62,7 @@ def add_image(
     return to_out(item)
 
 
-def update_image(
-    db: Session, image_id: uuid.UUID, data: GalleryUpdate
-) -> GalleryOut:
+def update_image(db: Session, image_id: uuid.UUID, data: GalleryUpdate) -> GalleryOut:
     item = get(db, image_id)
     fields = data.model_fields_set
     if "caption" in fields:
@@ -82,9 +76,7 @@ def update_image(
     return to_out(item)
 
 
-def delete_image(
-    db: Session, storage: FileStorage, image_id: uuid.UUID
-) -> None:
+def delete_image(db: Session, storage: FileStorage, image_id: uuid.UUID) -> None:
     item = get(db, image_id)
     paths = (item.image_path, item.thumb_path)
     db.delete(item)

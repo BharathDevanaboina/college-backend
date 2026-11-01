@@ -47,9 +47,7 @@ def create_admin(
     if not normalized_email:
         raise ValueError("Email must not be empty.")
 
-    admin = db.scalar(
-        select(AdminUser).where(AdminUser.email == normalized_email)
-    )
+    admin = db.scalar(select(AdminUser).where(AdminUser.email == normalized_email))
 
     if admin:
         admin.is_active = True
@@ -66,9 +64,7 @@ def create_admin(
 def deactivate_admin(db: Session, email: str) -> bool:
     """Deactivate an admin by email; return False if not found."""
     normalized_email = email.strip().lower()
-    admin = db.scalar(
-        select(AdminUser).where(AdminUser.email == normalized_email)
-    )
+    admin = db.scalar(select(AdminUser).where(AdminUser.email == normalized_email))
 
     if not admin:
         return False

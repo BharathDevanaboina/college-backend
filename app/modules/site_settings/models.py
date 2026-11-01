@@ -18,6 +18,4 @@ class SiteSettings(TimestampMixin, Base):
     email: Mapped[str | None] = mapped_column(String(320))
     address: Mapped[str | None] = mapped_column(Text)
     google_form_url: Mapped[str | None] = mapped_column(String(500))
-    social_links: Mapped[dict] = mapped_column(
-        JSON, nullable=False, default=dict
-    )
+    social_links: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)

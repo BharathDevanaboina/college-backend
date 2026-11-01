@@ -28,9 +28,7 @@ def to_out(banner: Banner) -> BannerOut:
     )
 
 
-def list_banners(
-    db: Session, *, active_only: bool = False
-) -> list[Banner]:
+def list_banners(db: Session, *, active_only: bool = False) -> list[Banner]:
     stmt = select(Banner).order_by(Banner.display_order, Banner.created_at)
     if active_only:
         stmt = stmt.where(Banner.is_active.is_(True))
@@ -81,9 +79,7 @@ def create_banner(
     return to_out(banner)
 
 
-def update_banner(
-    db: Session, banner_id: uuid.UUID, data: BannerUpdate
-) -> BannerOut:
+def update_banner(db: Session, banner_id: uuid.UUID, data: BannerUpdate) -> BannerOut:
     banner = _get(db, banner_id)
     fields = data.model_fields_set
 
@@ -124,9 +120,7 @@ def replace_image(
     return to_out(banner)
 
 
-def delete_banner(
-    db: Session, storage: FileStorage, banner_id: uuid.UUID
-) -> None:
+def delete_banner(db: Session, storage: FileStorage, banner_id: uuid.UUID) -> None:
     banner = _get(db, banner_id)
     paths = (banner.image_path, banner.thumb_path)
     db.delete(banner)

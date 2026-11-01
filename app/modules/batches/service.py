@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -67,9 +66,7 @@ def create_batch(db: Session, data: BatchCreate) -> BatchOut:
     return to_out(batch)
 
 
-def update_batch(
-    db: Session, batch_id: uuid.UUID, data: BatchUpdate
-) -> BatchOut:
+def update_batch(db: Session, batch_id: uuid.UUID, data: BatchUpdate) -> BatchOut:
     batch = get(db, batch_id)
     for key, value in data.model_dump(exclude_unset=True).items():
         if value is not None:

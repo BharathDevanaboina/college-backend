@@ -14,6 +14,7 @@ from app.modules.admin_auth.dependencies import AdminPrincipal, require_admin
 from app.modules.exam import service
 from app.modules.exam.schemas import (
     ExamInfo,
+    ExamPreview,
     ExamResult,
     ExamStartResponse,
     ExamSubmitRequest,
@@ -35,6 +36,7 @@ XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 # ---- student ----------------------------------------------------------------
+
 
 @public_router.get(
     "/info",
@@ -83,6 +85,19 @@ def submit_exam(
 
 # ---- admin ------------------------------------------------------------------
 
+
+@admin_router.post(
+    "/sets/preview",
+    response_model=ExamPreview,
+    summary="Validate an Excel file and preview questions without saving it",
+)
+def preview_set(
+    file: UploadFile = File(...),
+    settings: Settings = Depends(get_settings),
+) -> ExamPreview:
+    return service.preview_file(read_upload(file, max_mb=settings.max_excel_upload_mb))
+
+
 @admin_router.get(
     "/sets",
     response_model=list[SlotOut],
@@ -97,9 +112,7 @@ def download_template() -> Response:
     return Response(
         build_template(),
         media_type=XLSX,
-        headers={
-            "Content-Disposition": 'attachment; filename="exam-question-set-template.xlsx"'
-        },
+        headers={"Content-Disposition": 'attachment; filename="exam-question-set-template.xlsx"'},
     )
 
 
@@ -112,9 +125,7 @@ def validate_set(
     file: UploadFile = File(...),
     settings: Settings = Depends(get_settings),
 ) -> ValidationReport:
-    return service.validate_file(
-        read_upload(file, max_mb=settings.max_excel_upload_mb)
-    )
+    return service.validate_file(read_upload(file, max_mb=settings.max_excel_upload_mb))
 
 
 @admin_router.post(
@@ -132,9 +143,7 @@ def upload_set(
     admin: AdminPrincipal = Depends(require_admin),
 ) -> UploadResult:
     data = read_upload(file, max_mb=settings.max_excel_upload_mb)
-    return service.upload_set(
-        db, slot, name, file.filename or "questions.xlsx", data, admin.email
-    )
+    return service.upload_set(db, slot, name, file.filename or "questions.xlsx", data, admin.email)
 
 
 @admin_router.delete(

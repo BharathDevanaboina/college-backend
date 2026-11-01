@@ -74,12 +74,8 @@ def load_snapshot(db: Session, set_id: uuid.UUID) -> SetSnapshot | None:
     if exam_set is None:
         return None
 
-    questions = list(
-        db.scalars(select(ExamQuestion).where(ExamQuestion.exam_set_id == set_id))
-    )
-    passages = list(
-        db.scalars(select(ExamPassage).where(ExamPassage.exam_set_id == set_id))
-    )
+    questions = list(db.scalars(select(ExamQuestion).where(ExamQuestion.exam_set_id == set_id)))
+    passages = list(db.scalars(select(ExamPassage).where(ExamPassage.exam_set_id == set_id)))
 
     q_snaps = {
         q.id: QuestionSnap(
@@ -100,9 +96,7 @@ def load_snapshot(db: Session, set_id: uuid.UUID) -> SetSnapshot | None:
             section=p.section,
             content=p.content,
             question_ids=tuple(
-                q.id
-                for q in sorted(q_snaps.values(), key=lambda x: x.position)
-                if q.passage_id == p.id
+                q.id for q in sorted(q_snaps.values(), key=lambda x: x.position) if q.passage_id == p.id
             ),
         )
         for p in passages
@@ -145,9 +139,7 @@ def build_paper(snapshot: SetSnapshot, rng: random.Random) -> list[dict]:
             if q.section == code and q.passage_id is None
         ]
         units += [
-            ("passage", p.id)
-            for p in snapshot.passages.values()
-            if p.section == code and p.question_ids
+            ("passage", p.id) for p in snapshot.passages.values() if p.section == code and p.question_ids
         ]
         units.sort(key=lambda u: str(u[1]))  # deterministic base order before shuffling
         rng.shuffle(units)
@@ -177,9 +169,7 @@ def build_paper(snapshot: SetSnapshot, rng: random.Random) -> list[dict]:
                     }
                 )
         count = sum(1 if item["type"] == "question" else len(item["questions"]) for item in items)
-        sections.append(
-            {"code": code, "title": title, "question_count": count, "items": items}
-        )
+        sections.append({"code": code, "title": title, "question_count": count, "items": items})
     return sections
 
 
@@ -187,10 +177,7 @@ def grade(
     snapshot: SetSnapshot,
     answers: dict[uuid.UUID, uuid.UUID | None],
 ) -> dict:
-    per_section = {
-        code: {"correct": 0, "incorrect": 0, "unanswered": 0, "max": 0}
-        for code in SECTION_TITLES
-    }
+    per_section = {code: {"correct": 0, "incorrect": 0, "unanswered": 0, "max": 0} for code in SECTION_TITLES}
     review = []
     for q in snapshot.ordered_questions():
         chosen = answers.get(q.id)

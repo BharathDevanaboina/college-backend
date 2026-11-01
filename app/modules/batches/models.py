@@ -3,8 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 
-from sqlalchemy import Boolean, CheckConstraint, Date, ForeignKey, String, true,Uuid
-
+from sqlalchemy import Boolean, CheckConstraint, Date, ForeignKey, String, Uuid, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -19,7 +18,7 @@ class Batch(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     course_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        Uuid,
         ForeignKey("courses.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -27,11 +26,7 @@ class Batch(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     timings: Mapped[str] = mapped_column(String(100), nullable=False)
-    mode: Mapped[str] = mapped_column(
-        String(10), nullable=False, default="online", server_default="true"
-    )
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, server_default=true()
-    )
+    mode: Mapped[str] = mapped_column(String(10), nullable=False, default="online", server_default="true")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
 
     course: Mapped[Course] = relationship(lazy="joined")

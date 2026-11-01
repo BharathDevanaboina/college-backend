@@ -20,9 +20,7 @@ def _find(db: Session, course_id: uuid.UUID) -> Brochure | None:
 
 
 def list_status(db: Session) -> list[BrochureStatus]:
-    by_course = {
-        b.course_id: b for b in db.scalars(select(Brochure)).unique()
-    }
+    by_course = {b.course_id: b for b in db.scalars(select(Brochure)).unique()}
     result: list[BrochureStatus] = []
 
     for course in courses.list_courses(db):
@@ -80,9 +78,7 @@ def upload_brochure(
     # Delete the old private file only after the database commit succeeds.
     delete_files(storage, old_path)
 
-    return next(
-        item for item in list_status(db) if item.course_code == course.code
-    )
+    return next(item for item in list_status(db) if item.course_code == course.code)
 
 
 def delete_brochure(db: Session, storage: FileStorage, code: str) -> None:

@@ -27,10 +27,7 @@ def _cells(line: str) -> list[str]:
 
 def _table(lines: list[str]) -> dict:
     rows = [_cells(line) for line in lines]
-    rows = [
-        row for row in rows
-        if not all(SEPARATOR_CELL.match(cell) for cell in row if cell)
-    ]
+    rows = [row for row in rows if not all(SEPARATOR_CELL.match(cell) for cell in row if cell)]
     if len(rows) < 2:
         raise ContentError("a table needs a header row and at least one data row")
     width = len(rows[0])
@@ -38,9 +35,7 @@ def _table(lines: list[str]) -> dict:
         raise ContentError("a table needs at least two columns")
     for n, row in enumerate(rows[1:], start=2):
         if len(row) != width:
-            raise ContentError(
-                f"table row {n} has {len(row)} cells but the header has {width}"
-            )
+            raise ContentError(f"table row {n} has {len(row)} cells but the header has {width}")
     return {"type": "table", "header": rows[0], "rows": rows[1:]}
 
 

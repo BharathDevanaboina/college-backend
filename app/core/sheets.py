@@ -47,15 +47,11 @@ class GoogleSheetsClient:
 
     def _request(self, method: str, path: str, **kwargs):
         try:
-            response = self._session.request(
-                method, self._base + path, timeout=self._timeout, **kwargs
-            )
+            response = self._session.request(method, self._base + path, timeout=self._timeout, **kwargs)
         except Exception as exc:
             raise SheetsError(f"Google Sheets request failed: {exc}") from exc
         if response.status_code >= 400:
-            raise SheetsError(
-                f"Google Sheets returned {response.status_code}: {response.text[:300]}"
-            )
+            raise SheetsError(f"Google Sheets returned {response.status_code}: {response.text[:300]}")
         return response.json() if response.content else {}
 
     def _ensure_headers(self, tab: str, headers: list[str]) -> None:
@@ -64,9 +60,7 @@ class GoogleSheetsClient:
         with self._lock:
             if tab in self._tabs_with_headers:
                 return
-            existing = self._request(
-                "GET", f"/values/{quote(_a1(tab, '1:1'), safe='')}"
-            )
+            existing = self._request("GET", f"/values/{quote(_a1(tab, '1:1'), safe='')}")
             if not existing.get("values"):
                 self._request(
                     "PUT",

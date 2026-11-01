@@ -5,7 +5,9 @@ It runs on **Google Cloud Run**, stores files in **Cloud Storage for Firebase**,
 **Firebase Authentication** for the admin login and the students' phone OTP, and writes student
 submissions to **Google Sheets**.
 
-The frontend (website and admin portal) is a separate project. It talks to this API.
+The public website can remain a separate project and talks to this API. The
+administration SPA is served by this application at **`/admin`**; it signs in
+with Firebase and calls the existing protected `/api/v1/admin/*` APIs.
 
 ## What it does
 
@@ -33,6 +35,7 @@ docker compose up --build
 ```
 
 Then open <http://localhost:8000/docs>. That is the interactive API page.
+Open <http://localhost:8000/admin> for the administration interface.
 
 Locally everything Google-related is faked:
 - Admin token: `Bearer fake-admin:admin@college.com:mfa`.

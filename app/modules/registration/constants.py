@@ -53,6 +53,4 @@ INDIAN_STATES_AND_UTS = (
 
 def year_options() -> list[str]:
     current = ist_now().year
-    return [CURRENTLY_PURSUING] + [
-        str(year) for year in range(current, EARLIEST_PASS_YEAR - 1, -1)
-    ]
+    return [CURRENTLY_PURSUING] + [str(year) for year in range(current, EARLIEST_PASS_YEAR - 1, -1)]

@@ -25,11 +25,13 @@ from app.modules.exam.importer import ImportReport, parse_workbook
 from app.modules.exam.models import ExamOption, ExamPassage, ExamQuestion, ExamSet
 from app.modules.exam.schemas import (
     ExamInfo,
+    ExamPreview,
     ExamResult,
     ExamSetOut,
     ExamStartResponse,
     ExamSubmitRequest,
     IssueOut,
+    QuestionPreview,
     SlotOut,
     UploadResult,
     ValidationReport,
@@ -43,6 +45,7 @@ SHEET_HEADERS = registration.SHEET_BASE_HEADERS + ["Exam Set"]
 
 
 # ----- admin -----
+
 
 def _issues(items) -> list[IssueOut]:
     return [IssueOut(sheet=i.sheet, row=i.row, message=i.message) for i in items]
@@ -67,13 +70,29 @@ def _set_out(s: ExamSet) -> ExamSetOut:
 def list_slots(db: Session) -> list[SlotOut]:
     by_slot = {s.slot: s for s in db.scalars(select(ExamSet))}
     return [
-        SlotOut(slot=slot, exam_set=_set_out(by_slot[slot]) if slot in by_slot else None)
-        for slot in SLOTS
+        SlotOut(slot=slot, exam_set=_set_out(by_slot[slot]) if slot in by_slot else None) for slot in SLOTS
     ]
 
 
 def validate_file(data: bytes) -> ValidationReport:
     return to_report(parse_workbook(data))
+
+
+def preview_file(data: bytes, *, limit: int = 12) -> ExamPreview:
+    """Validate a file and return a bounded, admin-only question preview."""
+    report = parse_workbook(data)
+    return ExamPreview(
+        report=to_report(report),
+        questions=[
+            QuestionPreview(
+                section=question.section,
+                subsection=question.subsection,
+                content=question.content,
+                options=[text for _label, text in question.options],
+            )
+            for question in report.questions[:limit]
+        ],
+    )
 
 
 def upload_set(
@@ -167,6 +186,7 @@ def delete_set(db: Session, slot: int) -> None:
 
 # ----- student ---------------------------------------------------------------
 
+
 def exam_info(db: Session, settings: Settings) -> ExamInfo:
     count = db.scalar(select(func.count()).select_from(ExamSet)) or 0
     return ExamInfo(
@@ -226,9 +246,7 @@ def start_exam(
     )
 
 
-def submit_exam(
-    db: Session, settings: Settings, body: ExamSubmitRequest
-) -> ExamResult:
+def submit_exam(db: Session, settings: Settings, body: ExamSubmitRequest) -> ExamResult:
     claims = verify_token(
         body.attempt_token,
         audience=ATTEMPT_AUDIENCE,

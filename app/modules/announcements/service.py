@@ -17,11 +17,7 @@ def to_out(a: Announcement) -> AnnouncementOut:
 
 def list_all(db: Session) -> list[Announcement]:
     return list(
-        db.scalars(
-            select(Announcement).order_by(
-                Announcement.display_order, Announcement.created_at.desc()
-            )
-        )
+        db.scalars(select(Announcement).order_by(Announcement.display_order, Announcement.created_at.desc()))
     )
 
 
@@ -54,9 +50,7 @@ def create(db: Session, data: AnnouncementIn) -> AnnouncementOut:
     return to_out(item)
 
 
-def replace(
-    db: Session, item_id: uuid.UUID, data: AnnouncementIn
-) -> AnnouncementOut:
+def replace(db: Session, item_id: uuid.UUID, data: AnnouncementIn) -> AnnouncementOut:
     item = _get(db, item_id)
     for key, value in data.model_dump().items():
         setattr(item, key, value)

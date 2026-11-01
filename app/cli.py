@@ -26,9 +26,7 @@ def cmd_create_admin(args: argparse.Namespace) -> int:
         admin = service.create_admin(db, args.email, args.name)
     print(f"Admin access granted to {admin.email}.")
     if get_settings().auth_mode == "firebase" and not args.skip_firebase:
-        temporary_password = get_identity_verifier().ensure_admin_account(
-            admin.email, args.name
-        )
+        temporary_password = get_identity_verifier().ensure_admin_account(admin.email, args.name)
         if temporary_password:
             print("A Firebase sign-in account was created with this TEMPORARY password:")
             print(f"  {temporary_password}")
@@ -117,9 +115,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--email", required=True)
     p.set_defaults(func=cmd_deactivate_admin)
 
-    sub.add_parser("list-admins", help="List admin accounts").set_defaults(
-        func=cmd_list_admins
-    )
+    sub.add_parser("list-admins", help="List admin accounts").set_defaults(func=cmd_list_admins)
     sub.add_parser("flush-lead-sync", help="Retry submissions waiting for Google Sheets").set_defaults(
         func=cmd_flush_lead_sync
     )

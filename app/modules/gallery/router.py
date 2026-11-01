@@ -21,9 +21,7 @@ admin_router = APIRouter(
 )
 
 
-@admin_router.get(
-    "", response_model=list[GalleryOut], summary="List gallery images"
-)
+@admin_router.get("", response_model=list[GalleryOut], summary="List gallery images")
 def list_gallery(db: Session = Depends(get_db)) -> list[GalleryOut]:
     return [service.to_out(image) for image in service.list_images(db)]
 
@@ -43,9 +41,7 @@ def add_gallery_image(
     settings: Settings = Depends(get_settings),
 ) -> GalleryOut:
     data = read_upload(image, max_mb=settings.max_image_upload_mb)
-    return service.add_image(
-        db, storage, data=data, caption=caption, display_order=display_order
-    )
+    return service.add_image(db, storage, data=data, caption=caption, display_order=display_order)
 
 
 @admin_router.patch(
@@ -61,9 +57,7 @@ def update_gallery_image(
     return service.update_image(db, image_id, body)
 
 
-@admin_router.delete(
-    "/{image_id}", status_code=204, summary="Delete a gallery image"
-)
+@admin_router.delete("/{image_id}", status_code=204, summary="Delete a gallery image")
 def delete_gallery_image(
     image_id: uuid.UUID,
     db: Session = Depends(get_db),

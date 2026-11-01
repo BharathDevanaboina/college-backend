@@ -23,6 +23,20 @@ class ValidationReport(BaseModel):
     warnings: list[IssueOut]
 
 
+class QuestionPreview(BaseModel):
+    """A small admin-only preview of an uploaded Excel question."""
+
+    section: str
+    subsection: str
+    content: list[dict[str, Any]]
+    options: list[str]
+
+
+class ExamPreview(BaseModel):
+    report: ValidationReport
+    questions: list[QuestionPreview]
+
+
 class ExamSetOut(BaseModel):
     id: uuid.UUID
     slot: int
@@ -44,6 +58,7 @@ class UploadResult(BaseModel):
 
 
 # ---- student side ----
+
 
 class OptionPublic(BaseModel):
     id: uuid.UUID

@@ -16,9 +16,7 @@ def to_out(v: Video) -> VideoOut:
 
 
 def list_videos(db: Session, *, active_only: bool = False) -> list[Video]:
-    stmt = select(Video).order_by(
-        Video.display_order, Video.created_at.desc()
-    )
+    stmt = select(Video).order_by(Video.display_order, Video.created_at.desc())
     if active_only:
         stmt = stmt.where(Video.is_active.is_(True))
     return list(db.scalars(stmt))

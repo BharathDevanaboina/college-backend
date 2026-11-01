@@ -15,3 +15,4 @@ class SyncStatus(BaseModel):
     pending_rows: int
     oldest_pending_since: datetime | None
     max_attempts_so_far: int
+    spreadsheet_url: str | None = None
