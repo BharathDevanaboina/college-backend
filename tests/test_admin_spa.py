@@ -44,6 +44,7 @@ def test_admin_spa_and_public_firebase_config_are_served(tmp_path: Path) -> None
     assert app_script.status_code == 200
     assert "signInWithEmailAndPassword" in app_script.text
     assert "TotpMultiFactorGenerator" not in app_script.text
+    assert "auth/configuration-not-found" in app_script.text
 
     config = client.get("/admin/firebase-config.js")
     assert config.status_code == 200

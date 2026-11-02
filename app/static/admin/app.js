@@ -34,6 +34,16 @@ function problem(error) {
   notice(detail, true);
 }
 
+function loginProblem(error) {
+  const messages = {
+    "auth/configuration-not-found": "Firebase Email/Password sign-in is not enabled for this project. Enable it in Firebase Console → Authentication → Sign-in method.",
+    "auth/invalid-credential": "The email address or password is incorrect.",
+    "auth/user-disabled": "This Firebase account has been disabled.",
+    "auth/too-many-requests": "Too many sign-in attempts. Please wait a moment and try again.",
+  };
+  notice(messages[error?.code] || error?.message || "Unable to sign in. Please try again.", true);
+}
+
 async function token() {
   if (!state.user) throw new Error("Your session has ended. Please sign in again.");
   return state.user.getIdToken();
@@ -83,7 +93,7 @@ function loginScreen(message = "Sign in with your authorized administrator email
   root.querySelector("#login-form").onsubmit = async (event) => {
     event.preventDefault(); const form = new FormData(event.currentTarget);
     try { await signInWithEmailAndPassword(state.auth, form.get("email"), form.get("password")); }
-    catch (error) { problem(error); }
+    catch (error) { loginProblem(error); }
   };
 }
 
