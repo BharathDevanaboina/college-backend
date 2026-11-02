@@ -3,6 +3,7 @@ import {
   TotpMultiFactorGenerator,
   getAuth,
   getMultiFactorResolver,
+  multiFactor,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
@@ -96,6 +97,30 @@ function loginScreen(message = "Sign in with an authorized Firebase administrato
     try { const code = new FormData(event.currentTarget).get("code"); const hint = state.resolver?.hints?.[0]; if (!hint) throw new Error("No authenticator factor is available for this account."); await state.resolver.resolveSignIn(TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code)); }
     catch (error) { problem(error); }
   };
+}
+
+async function enrollAuthenticator(user) {
+  try {
+    const session = await multiFactor(user).getSession();
+    const secret = await TotpMultiFactorGenerator.generateSecret(session);
+    const accountName = user.email || "College administrator";
+    root.innerHTML = `<main class="auth-shell"><section class="auth-card"><div class="brand-mark">C</div><h1>Set up Google Authenticator</h1><p>Open Google Authenticator, choose <strong>Enter a setup key</strong>, then enter the details below. Use a time-based code.</p><div class="auth-secret"><span>Account</span><strong>${escapeHtml(accountName)}</strong><span>Issuer</span><strong>College Control</strong><span>Setup key</span><code>${escapeHtml(secret.secretKey)}</code></div><form id="enroll-totp-form"><div class="field"><label>6-digit authenticator code</label><input required inputmode="numeric" autocomplete="one-time-code" name="code" placeholder="123456" /></div><button class="button" type="submit">Complete secure setup</button><button class="text-button" type="button" id="cancel-enrolment">Sign out</button></form></section></main>`;
+    root.querySelector("#cancel-enrolment").onclick = () => signOut(state.auth);
+    root.querySelector("#enroll-totp-form").onsubmit = async (event) => {
+      event.preventDefault();
+      try {
+        const code = new FormData(event.currentTarget).get("code");
+        const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code);
+        await multiFactor(user).enroll(assertion, "College Control");
+        await user.getIdToken(true);
+        notice("Google Authenticator is set up.");
+        shell(); renderPage();
+      } catch (error) { problem(error); }
+    };
+  } catch (error) {
+    problem(error);
+    await signOut(state.auth);
+  }
 }
 
 function shell() {
@@ -275,6 +300,18 @@ async function boot() {
   const config = window.__FIREBASE_CONFIG__;
   if (!config?.apiKey || !config?.authDomain || !config?.appId) { loginScreen("Firebase web configuration is missing. Set FIREBASE_WEB_* values for this environment before signing in."); return; }
   state.auth = getAuth(initializeApp(config));
-  onAuthStateChanged(state.auth, async (user) => { state.user = user; if (!user) { loginScreen(); return; } try { await user.getIdToken(true); shell(); renderPage(); } catch (error) { problem(error); loginScreen(); } });
+  onAuthStateChanged(state.auth, async (user) => {
+    state.user = user;
+    if (!user) { loginScreen(); return; }
+    try {
+      await user.getIdToken(true);
+      await api("/admin/me");
+      shell(); renderPage();
+    } catch (error) {
+      if (error.code === "MFA_REQUIRED") { await enrollAuthenticator(user); return; }
+      problem(error);
+      await signOut(state.auth);
+    }
+  });
 }
 boot();

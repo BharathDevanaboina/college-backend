@@ -40,6 +40,10 @@ def test_admin_spa_and_public_firebase_config_are_served(tmp_path: Path) -> None
     assert "<title>College Admin</title>" in page.text
     assert 'src="/admin/app.js"' in page.text
 
+    app_script = client.get("/admin/app.js")
+    assert app_script.status_code == 200
+    assert "Set up Google Authenticator" in app_script.text
+
     config = client.get("/admin/firebase-config.js")
     assert config.status_code == 200
     assert "public-test-key" in config.text

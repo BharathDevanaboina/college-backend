@@ -49,7 +49,7 @@ This does two things:
 Then:
 
 1. Sign in on the admin portal with the temporary password and change it. Firebase **Forgot password** also works.
-2. The admin portal (frontend) asks you to **set up Google Authenticator**: scan the QR code and type the 6-digit code. From then on every sign-in needs the code.
+2. The admin portal asks you to **set up Google Authenticator**. Choose **Enter a setup key** in Google Authenticator, enter the account, issuer and setup key displayed by the portal, select a time-based code, then enter the 6-digit code. From then on every sign-in needs the code.
 
 To remove access:
 

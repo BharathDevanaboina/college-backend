@@ -41,7 +41,7 @@ def require_admin(
     if admin is None:
         raise Forbidden("This account does not have admin access.", code="NOT_AN_ADMIN")
 
-    service.record_login(db, admin, identity.uid)
+    service.record_login(db, admin)
     return AdminPrincipal(
         admin_id=str(admin.id),
         email=admin.email,
