@@ -12,12 +12,12 @@ There are three access levels:
 |---|---|---|
 | Public website | No sign-in for read-only content | `GET /api/v1/public/site`, registration choices and exam availability |
 | Student | Firebase Phone Auth token + Firebase App Check | Brochure download and exam start after a fresh OTP |
-| Administrator | Verified Firebase email/password ID token, Google Authenticator second factor and an active database allow-list entry | Every `/api/v1/admin/**` endpoint |
+| Administrator | Verified Firebase email/password ID token and an active database allow-list entry | Every `/api/v1/admin/**` endpoint |
 | Cloud Scheduler | Google OIDC token from an allowed service account | `/internal/lead-sync/flush` only |
 
 The backend does **not** accept a Firebase API key as authorization. The web
 client sends Firebase-issued tokens. `require_admin` verifies the ID token,
-checks email verification and MFA, then looks up the email in `admin_users`.
+checks email verification, then looks up the email in `admin_users`.
 `require_app_check` protects the two public submission endpoints.
 
 ### Admin accounts
@@ -28,7 +28,7 @@ An operator creates an allow-list entry and Firebase account with:
 ./scripts/run-cli.sh production create-admin --email person@example.com --name "Person Name"
 ```
 
-The Firebase account contains the password and MFA enrollment. The database
+The Firebase account contains the password. The database
 only contains the email allow-list, display name, active state and last-login
 time. Deactivating an entry blocks backend access immediately, even if the
 Firebase user still exists.

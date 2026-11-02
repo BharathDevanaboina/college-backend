@@ -39,7 +39,7 @@ Every error has the same shape (content type `application/problem+json`):
 | `APP_CHECK_FAILED` | 401 | App Check token missing or invalid. Reload the page |
 | `OTP_REQUIRED`, `OTP_EXPIRED` | 401 | Student must (re)verify the mobile number |
 | `MOBILE_MISMATCH` | 422 | Number in the form differs from the verified one |
-| `MFA_REQUIRED`, `NOT_AN_ADMIN`, `EMAIL_NOT_VERIFIED` | 403 | Admin access problems |
+| `NOT_AN_ADMIN`, `EMAIL_NOT_VERIFIED` | 403 | Admin access problems |
 | `NOT_FOUND`, `COURSE_NOT_FOUND`, `BROCHURE_NOT_FOUND` | 404 | |
 | `SLOT_OCCUPIED` | 409 | Delete the existing exam set first |
 | `TOKEN_EXPIRED`, `SET_REPLACED` | 410 | Exam attempt no longer valid. Start a new one |
@@ -329,7 +329,7 @@ Use `review` with the saved paper to show each question with the student's choic
 
 | Method and path | Purpose |
 |---|---|
-| `GET /me` | Check access after sign-in (403 codes: `MFA_REQUIRED`, `NOT_AN_ADMIN`) |
+| `GET /me` | Check access after sign-in (403 code: `NOT_AN_ADMIN`) |
 | `GET`, `PUT /site-settings` | Contact details and links (PUT replaces all fields) |
 | `GET /courses`, `GET /courses/{code}`, `PATCH /courses/{code}` | Course details and fees. `fee_breakup` must add up to `total_fee_inr` (send `[]` to show the total only) |
 | `GET /batches?course=PGDM`, `POST /batches`, `PATCH /batches/{id}`, `DELETE /batches/{id}` | Batches: `course_code`, `start_date`, `end_date`, `timings`, `mode` (`online` or `offline`), `is_active` |
@@ -347,35 +347,15 @@ Use `review` with the saved paper to show each question with the student's choic
 
 **Images:** JPEG, PNG or WebP, up to 10 MB, are converted to WebP in two sizes: `image_url` (max 1920 px wide) and `thumb_url` (max 600 px).
 
-## Admin sign-in with Google Authenticator (frontend outline)
+## Admin sign-in with email and password (frontend outline)
 
 ```js
 import {
   getAuth,
-  signInWithEmailAndPassword,
-  getMultiFactorResolver,
-  TotpMultiFactorGenerator,
-  multiFactor
+  signInWithEmailAndPassword
 } from "firebase/auth";
 
-try {
-  await signInWithEmailAndPassword(auth, email, password);
-} catch (e) {
-  if (e.code !== "auth/multi-factor-auth-required") throw e;
-  const resolver = getMultiFactorResolver(auth, e);
-  const hint = resolver.hints.find(h => h.factorId === TotpMultiFactorGenerator.FACTOR_ID);
-  const assertion = TotpMultiFactorGenerator.assertionForSignIn(hint.uid, sixDigitCode);
-  await resolver.resolveSignIn(assertion);
-}
-
-// First time only (GET /me answered MFA_REQUIRED): enrol Google Authenticator
-const session = await multiFactor(auth.currentUser).getSession();
-const secret = await TotpMultiFactorGenerator.generateSecret(session);
-showQrCode(secret.generateQrCodeUrl(auth.currentUser.email, "College Admin"));
-await multiFactor(auth.currentUser).enroll(
-  TotpMultiFactorGenerator.assertionForEnrollment(secret, codeFromApp),
-  "Authenticator"
-);
+await signInWithEmailAndPassword(auth, email, password);
 ```
 
 ## Limits

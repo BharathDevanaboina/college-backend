@@ -60,7 +60,7 @@ Read them in this order the first time:
 | 1 | [Architecture](docs/01-architecture.md) | Understand the modules and how a request flows |
 | 2 | [Local development and tests](docs/02-local-development.md) | Run and change the code on your computer |
 | 3 | [Configuration](docs/03-configuration.md) | Every setting, and where to change it |
-| 4 | [Firebase setup](docs/04-firebase-setup.md) | Admin login, Google Authenticator, phone OTP, App Check, Storage |
+| 4 | [Firebase setup](docs/04-firebase-setup.md) | Admin login, phone OTP, App Check, Storage |
 | 5 | [Google Sheets setup](docs/05-google-sheets-setup.md) | The spreadsheet that receives student submissions |
 | 6 | [Google Cloud setup (one time)](docs/06-google-cloud-setup.md) | Projects, database, secrets, service accounts, scheduler |
 | 7 | [Deployment and CI/CD](docs/07-deployment.md) | Deploy to staging and production, roll back |

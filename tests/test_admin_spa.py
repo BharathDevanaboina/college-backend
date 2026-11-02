@@ -42,7 +42,8 @@ def test_admin_spa_and_public_firebase_config_are_served(tmp_path: Path) -> None
 
     app_script = client.get("/admin/app.js")
     assert app_script.status_code == 200
-    assert "Set up Google Authenticator" in app_script.text
+    assert "signInWithEmailAndPassword" in app_script.text
+    assert "TotpMultiFactorGenerator" not in app_script.text
 
     config = client.get("/admin/firebase-config.js")
     assert config.status_code == 200

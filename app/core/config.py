@@ -55,7 +55,6 @@ class Settings(BaseSettings):
     firebase_web_messaging_sender_id: str | None = None
     firebase_web_measurement_id: str | None = None
     auth_mode: Literal["firebase", "fake"] = "firebase"
-    require_admin_mfa: bool = True
     app_check_enabled: bool = True
     otp_max_age_seconds: int = 600
     delete_firebase_phone_user: bool = True

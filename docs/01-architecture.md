@@ -7,7 +7,7 @@ flowchart LR
     student["Student browser"] --> hosting["Firebase Hosting<br/>(frontend + /api rewrite)"]
     admin["Admin browser"] --> hosting
     student -- "phone OTP" --> fbauth["Firebase Auth"]
-    admin -- "email + password" --> authenticator["Google Authenticator"] --> fbauth
+    admin -- "email + password" --> fbauth
     hosting -->|"/api/..."| api["Cloud Run: college-api<br/>(this FastAPI app)"]
     api --> sql["Cloud SQL<br/>(PostgreSQL)"]
     api --> storage["Cloud Storage for Firebase<br/>images and brochures"]
@@ -21,7 +21,7 @@ flowchart LR
 - **PostgreSQL (Cloud SQL)** stores everything the admin manages: settings, courses, batches, banners, announcements, gallery, videos, brochure metadata and exam questions.
 - **Firebase Storage** stores image files (public) and brochure PDFs (private; students get them only through the API after OTP).
 - **Google Sheets** receives one row per brochure download and per exam registration. Student lead details are not persisted in PostgreSQL; if Sheets is briefly unavailable, the row is held temporarily in the retry queue and Cloud Scheduler retries it every 5 minutes. The backend only "verifies" the tokens Firebase issues.
-- **Firebase Auth** handles the admin login (email, password and Google Authenticator) and the student phone OTP.
+- **Firebase Auth** handles the admin email/password login and the student phone OTP.
 - **Admin SPA** is served at `/admin` from this FastAPI service. It uses the
   Firebase Web SDK only to obtain an administrator's ID token; all data changes
   still go through the existing protected FastAPI APIs.
@@ -77,7 +77,7 @@ Each one has two implementations: a real one (Firebase, Google) and a fake one f
 1. The browser calls `https://college.com/api/v1/...`; Firebase Hosting forwards it to Cloud Run.
 2. Middleware adds a request ID and security headers, and logs the request.
 3. Router dependencies run first:
-   - `require_admin` checks the Firebase token, the Google Authenticator step and the admin allow-list.
+   - `require_admin` checks the Firebase token, verified email and the admin allow-list.
    - `require_app_check` checks that the call comes from the real website.
    - `rate_limit` slows down abusive traffic.
 4. The service function does the work and the database session commits.

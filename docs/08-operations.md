@@ -9,7 +9,6 @@ All commands assume `gcloud config set project college-prod` (or staging) and `R
 | Add an admin | `./scripts/run-cli.sh production create-admin --email person@college.com --name "Name"`. Temporary password is in the job logs ([details](04-firebase-setup.md#creating-the-admin-account)) |
 | Remove an admin | `./scripts/run-cli.sh production deactivate-admin --email person@college.com` |
 | List admins | `./scripts/run-cli.sh production list-admins` (output in job logs) |
-| Admin lost their phone (Authenticator) | Firebase Console → Authentication → Users → the user → remove the second factor (or delete the user and run `create-admin` again). They enrol a new Authenticator at the next sign-in |
 | Admin forgot password | **Forgot password** on the admin login page (Firebase sends a reset email) |
 | Replace an exam set | Admin portal → Exam sets → **Validate** the new file → **Delete** the old set → **Upload** into the empty slot. Students who started on the old set must start again |
 | Check an exam file offline | `python -m app.cli validate-exam-file my-set.xlsx` |
@@ -170,7 +169,6 @@ Useful log searches (Logs Explorer):
 | `/readyz` returns 503 | Database unreachable. Check the Cloud SQL instance is running, `CLOUD_SQL_CONNECTION_NAME` is right, the `college-api` service account has **Cloud SQL Client**, and the `college-db-password` secret matches |
 | Migration job fails | Cloud Run → Jobs → `college-migrate` → Logs. If the password changed, redeploy; the service is not changed until migrations succeed |
 | Admin gets "This account does not have admin access" | Email not in the allow-list. Run `create-admin` |
-| Admin gets "Please complete the Google Authenticator step" | Admin hasn't set up TOTP yet, or TOTP isn't enabled in the project ([Firebase setup, step 2.6](04-firebase-setup.md#2-set-up-authentication)) |
 | Admin gets "Your email address is not verified" | Run `create-admin` again; it marks the Firebase email verified |
 | Students get "App verification failed" | App Check site key or domain mismatch. Check the reCAPTCHA key domains and the App Check registration ([Firebase setup, step 3](04-firebase-setup.md#3-app-check-blocks-bots-from-the-public-forms)) |
 | Students never receive the SMS | Domain missing from **Authorized domains**, SMS region policy not allowing India, or Firebase SMS quota reached (Authentication → Usage) |

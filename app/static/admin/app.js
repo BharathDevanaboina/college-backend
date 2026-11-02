@@ -1,9 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import {
-  TotpMultiFactorGenerator,
   getAuth,
-  getMultiFactorResolver,
-  multiFactor,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
@@ -11,7 +8,7 @@ import {
 
 const root = document.querySelector("#app");
 const toastRegion = document.querySelector("#toast-region");
-const state = { auth: null, user: null, page: "dashboard", cache: {}, resolver: null };
+const state = { auth: null, user: null, page: "dashboard", cache: {} };
 const nav = [
   ["dashboard", "◫", "Overview"], ["settings", "⚙", "Contact & settings"],
   ["courses", "◈", "Courses & fees"], ["batches", "◷", "Batches"],
@@ -81,46 +78,13 @@ function confirmAction(title, message, actionLabel = "Delete") {
   });
 }
 
-function loginScreen(message = "Sign in with an authorized Firebase administrator account.") {
-  root.innerHTML = `<main class="auth-shell"><section class="auth-card"><div class="brand-mark">C</div><h1>College Control</h1><p>${escapeHtml(message)}</p><form id="login-form"><div class="field"><label>Email address</label><input required type="email" name="email" autocomplete="email" /></div><div class="field"><label>Password</label><input required type="password" name="password" autocomplete="current-password" /></div><button class="button" type="submit">Sign in securely</button></form><form id="totp-form" hidden><div class="field"><label>Authenticator code</label><input required inputmode="numeric" autocomplete="one-time-code" name="code" placeholder="123456" /></div><button class="button" type="submit">Verify code</button></form></section></main>`;
+function loginScreen(message = "Sign in with your authorized administrator email and password.") {
+  root.innerHTML = `<main class="auth-shell"><section class="auth-card"><div class="brand-mark">C</div><h1>College Control</h1><p>${escapeHtml(message)}</p><form id="login-form"><div class="field"><label>Email address</label><input required type="email" name="email" autocomplete="email" /></div><div class="field"><label>Password</label><input required type="password" name="password" autocomplete="current-password" /></div><button class="button" type="submit">Sign in securely</button></form></section></main>`;
   root.querySelector("#login-form").onsubmit = async (event) => {
     event.preventDefault(); const form = new FormData(event.currentTarget);
     try { await signInWithEmailAndPassword(state.auth, form.get("email"), form.get("password")); }
-    catch (error) {
-      if (error.code === "auth/multi-factor-auth-required") {
-        state.resolver = getMultiFactorResolver(state.auth, error); root.querySelector("#login-form").hidden = true; root.querySelector("#totp-form").hidden = false; notice("Enter the code from Google Authenticator.");
-      } else problem(error);
-    }
-  };
-  root.querySelector("#totp-form").onsubmit = async (event) => {
-    event.preventDefault();
-    try { const code = new FormData(event.currentTarget).get("code"); const hint = state.resolver?.hints?.[0]; if (!hint) throw new Error("No authenticator factor is available for this account."); await state.resolver.resolveSignIn(TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code)); }
     catch (error) { problem(error); }
   };
-}
-
-async function enrollAuthenticator(user) {
-  try {
-    const session = await multiFactor(user).getSession();
-    const secret = await TotpMultiFactorGenerator.generateSecret(session);
-    const accountName = user.email || "College administrator";
-    root.innerHTML = `<main class="auth-shell"><section class="auth-card"><div class="brand-mark">C</div><h1>Set up Google Authenticator</h1><p>Open Google Authenticator, choose <strong>Enter a setup key</strong>, then enter the details below. Use a time-based code.</p><div class="auth-secret"><span>Account</span><strong>${escapeHtml(accountName)}</strong><span>Issuer</span><strong>College Control</strong><span>Setup key</span><code>${escapeHtml(secret.secretKey)}</code></div><form id="enroll-totp-form"><div class="field"><label>6-digit authenticator code</label><input required inputmode="numeric" autocomplete="one-time-code" name="code" placeholder="123456" /></div><button class="button" type="submit">Complete secure setup</button><button class="text-button" type="button" id="cancel-enrolment">Sign out</button></form></section></main>`;
-    root.querySelector("#cancel-enrolment").onclick = () => signOut(state.auth);
-    root.querySelector("#enroll-totp-form").onsubmit = async (event) => {
-      event.preventDefault();
-      try {
-        const code = new FormData(event.currentTarget).get("code");
-        const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code);
-        await multiFactor(user).enroll(assertion, "College Control");
-        await user.getIdToken(true);
-        notice("Google Authenticator is set up.");
-        shell(); renderPage();
-      } catch (error) { problem(error); }
-    };
-  } catch (error) {
-    problem(error);
-    await signOut(state.auth);
-  }
 }
 
 function shell() {
@@ -308,7 +272,6 @@ async function boot() {
       await api("/admin/me");
       shell(); renderPage();
     } catch (error) {
-      if (error.code === "MFA_REQUIRED") { await enrollAuthenticator(user); return; }
       problem(error);
       await signOut(state.auth);
     }

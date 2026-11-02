@@ -42,7 +42,7 @@ With `AUTH_MODE=fake` (the default in `.env.example` and Docker), Firebase is si
 
 | What | Value to send |
 |---|---|
-| Admin requests | Header `Authorization: Bearer fake-admin:admin@college.com:mfa` (`mfa` means "Google Authenticator done") |
+| Admin requests | Header `Authorization: Bearer fake-admin:admin@college.com` |
 | Student OTP token | Field `"firebase_id_token": "fake-phone:+919876543210"` (must match the mobile in the form) |
 | App Check | Off locally (`APP_CHECK_ENABLED=false`). When on: header `X-Firebase-AppCheck: fake-app-check` |
 

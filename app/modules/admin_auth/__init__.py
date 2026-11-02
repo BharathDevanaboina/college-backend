@@ -1,6 +1,6 @@
 """Admin authentication module.
 
-Firebase sign-in (email + password + Google Authenticator) plus an allow-list.
+Firebase email/password sign-in plus a SQL allow-list.
 """
 
 from app.core.module import Module

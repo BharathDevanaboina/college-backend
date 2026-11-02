@@ -34,7 +34,7 @@ def cmd_create_admin(args: argparse.Namespace) -> int:
             print("(or use 'Forgot password' on the admin login page).")
         else:
             print("The existing Firebase account was found and its email is marked as verified.")
-    print("Next: the admin signs in and sets up Google Authenticator (docs/04-firebase-setup.md).")
+    print("Next: the admin signs in at /admin and changes the temporary password.")
     return 0
 
 

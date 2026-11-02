@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from fastapi import Depends, Header
 from sqlalchemy.orm import Session
 
-from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.core.dependencies import get_identity_verifier
 from app.core.error import Forbidden, Unauthorized
@@ -25,7 +24,6 @@ class AdminPrincipal:
 def require_admin(
     authorization: str | None = Header(default=None),
     db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
     verifier: IdentityVerifier = Depends(get_identity_verifier),
 ) -> AdminPrincipal:
     if not authorization or not authorization.startswith("Bearer "):
@@ -34,9 +32,6 @@ def require_admin(
     identity = verifier.verify_admin_token(authorization.removeprefix("Bearer ").strip())
     if not identity.email or not identity.email_verified:
         raise Forbidden("Your email address is not verified.", code="EMAIL_NOT_VERIFIED")
-    if settings.require_admin_mfa and not identity.mfa_verified:
-        raise Forbidden("Please complete the Google Authenticator step.", code="MFA_REQUIRED")
-
     admin = service.get_active_admin(db, identity.email)
     if admin is None:
         raise Forbidden("This account does not have admin access.", code="NOT_AN_ADMIN")

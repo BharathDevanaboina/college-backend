@@ -46,7 +46,6 @@ Before the first deploy, replace every `REPLACE_ME` value. The deploy script ref
 |---|---|---|
 | `GCP_PROJECT_ID` | empty | The Firebase/Google Cloud project ID |
 | `AUTH_MODE` | `firebase` | `fake` only for local and tests |
-| `REQUIRE_ADMIN_MFA` | `true` | Admins must complete Google Authenticator |
 | `APP_CHECK_ENABLED` | `true` | Public form submissions must carry a valid App Check token |
 | `OTP_MAX_AGE_SECONDS` | `600` | The phone OTP must have been completed within this many seconds |
 | `DELETE_FIREBASE_PHONE_USER` | `true` | Remove the temporary Firebase phone user after the details reach Google Sheets |

@@ -16,21 +16,8 @@ The Firebase project and the Google Cloud project are the same project.
 2. **Sign-in method:**
    - Enable **Email/Password**. This is for the admin. Leave **Email link** off.
    - Enable **Phone**. This is for student OTP.
-3. **Upgrade to Identity Platform:** Authentication → Settings → **Upgrade to Firebase Authentication with Identity Platform**. This is needed for Google Authenticator (TOTP) and SMS region controls. It's free for this usage level; SMS is billed per message.
-4. **Authorized domains** (Settings → Authorized domains): add the website domains, e.g. `college.com` and `www.college.com`. Phone sign-in only works on these domains.
-5. **SMS region policy** (Settings → SMS region policy): choose **Allow** and select **India** only. This blocks SMS fraud to foreign numbers.
-6. **Turn on Google Authenticator (TOTP) for the admin.** There is no button for this yet; run this once from a terminal where `gcloud` is logged in as a project owner:
-
-   ```bash
-   PROJECT_ID=college-prod
-   curl -X PATCH "https://identitytoolkit.googleapis.com/admin/v2/projects/${PROJECT_ID}/config?updateMask=mfa" \
-     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-     -H "X-Goog-User-Project: ${PROJECT_ID}" \
-     -H "Content-Type: application/json" \
-     -d '{"mfa":{"providerConfigs":[{"state":"ENABLED","totpProviderConfig":{"adjacentIntervals":5}}]}}'
-   ```
-
-   A JSON reply describing the config means it worked.
+3. **Authorized domains** (Settings → Authorized domains): add the website domains, e.g. `college.com` and `www.college.com`. Phone sign-in only works on these domains.
+4. **SMS region policy** (Settings → SMS region policy): choose **Allow** and select **India** only. This blocks SMS fraud to foreign numbers.
 7. **Staging only, test phone numbers:** Sign-in method → Phone → Phone numbers for testing. Add e.g. `+91 99999 00001` with code `123456`. Testers then receive no real SMS and it costs nothing.
 
 ## Creating the admin account
@@ -49,7 +36,7 @@ This does two things:
 Then:
 
 1. Sign in on the admin portal with the temporary password and change it. Firebase **Forgot password** also works.
-2. The admin portal asks you to **set up Google Authenticator**. Choose **Enter a setup key** in Google Authenticator, enter the account, issuer and setup key displayed by the portal, select a time-based code, then enter the 6-digit code. From then on every sign-in needs the code.
+2. Sign in to the admin portal with that email and password.
 
 To remove access:
 
